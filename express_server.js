@@ -61,10 +61,11 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+// endpoint to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post("/urls", (req, res) => {
   urlDatabase[generateRandomString()] = req.body.longURL;
-  console.log(urlDatabase); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  console.log(urlDatabase);
+  res.send("Ok");
 });
 
 // start the server and listen on the specified port
