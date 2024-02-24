@@ -2,8 +2,25 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 
+// function to generate random 6 character string for shortened url
+const generateRandomString = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const charactersLength = characters.length;
+  const stringLength = 6;
+
+  for (let i = 0; i < stringLength; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+
+  return result;
+}
+
 // set the view engine to EJS
 app.set('view engine', 'ejs');
+
+// set express to convert buffer into readable string
+app.use(express.urlencoded({ extended: true }));
 
 // database of short URLs and their corresponding long URLs
 const urlDatabase = {
@@ -27,6 +44,11 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// route to display page to add new url to our database
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 // route to render the 'urls_show' template with specific URL information
 app.get('/urls/:id', (req, res) => {
   console.log(req.params);
@@ -37,6 +59,11 @@ app.get('/urls/:id', (req, res) => {
 // route to return the urlDatabase object as JSON
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 // start the server and listen on the specified port
