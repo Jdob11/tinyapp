@@ -69,7 +69,14 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-//handles POST request to edit long url by redirecting to the edit page
+//handles POST request to edit long url by updating long url in urlDatabase for current id
+app.post('/urls/:id', (req, res) => {
+  const id = req.params.id;
+  urlDatabase[id] = req.body.longURL;
+  res.redirect('/urls');
+});
+
+//handles POST request to edit long url from homepage by redirecting to the edit page
 app.post('/urls/:id/edit', (req, res) => {
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
