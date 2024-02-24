@@ -62,13 +62,14 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+// handles POST request to delete a URL with the specified ID from the urlDatabase object
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls');
 });
 
-// endpoint to generate short url id, pair with user given long url, and add both to urlDatabase
+// handles POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
