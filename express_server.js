@@ -69,6 +69,12 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+//handles POST request to edit long url by redirecting to the edit page
+app.post('/urls/:id/edit', (req, res) => {
+  const id = req.params.id;
+  res.redirect(`/urls/${id}`);
+});
+
 // handles POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
   const id = generateRandomString();
