@@ -28,14 +28,9 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-// route for the homepage
+// route for no route to redirect to urls main page
 app.get('/', (req, res) => {
-  res.send('Hello!');
-});
-
-// route to display a simple HTML page with "Hello World"
-app.get('/hello', (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  res.redirect('/urls');
 });
 
 // route to render the 'urls_index' template with urlDatabase
@@ -67,8 +62,14 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect('/urls');
+});
+
 // endpoint to generate short url id, pair with user given long url, and add both to urlDatabase
-app.post("/urls", (req, res) => {
+app.post('/urls', (req, res) => {
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
   res.redirect(`/urls/${id}`);
@@ -76,5 +77,5 @@ app.post("/urls", (req, res) => {
 
 // start the server and listen on the specified port
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tinyapp server listening on port ${PORT}!`);
 });
