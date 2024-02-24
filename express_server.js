@@ -56,6 +56,12 @@ app.get('/urls/:id', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+// route to use short url id to redirect user to longURL site
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+});
+
 // route to return the urlDatabase object as JSON
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
@@ -63,9 +69,9 @@ app.get('/urls.json', (req, res) => {
 
 // endpoint to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString()] = req.body.longURL;
-  console.log(urlDatabase);
-  res.send("Ok");
+  const id = generateRandomString();
+  urlDatabase[id] = req.body.longURL;
+  res.redirect(`/urls/${id}`);
 });
 
 // start the server and listen on the specified port
