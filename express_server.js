@@ -89,6 +89,13 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+// handles POST request to create cookie with username when user fills form in navbar
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  res.cookie('Username', username);
+  res.redirect('/urls');
+})
+
 // start the server and listen on the specified port
 app.listen(PORT, () => {
   console.log(`Tinyapp server listening on port ${PORT}!`);
