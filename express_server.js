@@ -109,6 +109,12 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 })
 
+//handles POST request to clear username cookie when logout button is pressed
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+})
+
 // start the server and listen on the specified port
 app.listen(PORT, () => {
   console.log(`Tinyapp server listening on port ${PORT}!`);
