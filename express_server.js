@@ -1,6 +1,8 @@
-const express = require('express');
+// dependencies
 const cookieParser = require('cookie-parser')
-const app = express();
+const express = require('express');
+
+// constants
 const PORT = 8080;
 
 // function to generate random 6 character string for shortened url
@@ -9,21 +11,21 @@ const generateRandomString = () => {
   let result = '';
   const charactersLength = characters.length;
   const stringLength = 6;
-
+  
   for (let i = 0; i < stringLength; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-
+  
   return result;
 }
 
-app.use(cookieParser());
+// initialize express
+const app = express();
 
-// set the view engine to EJS
-app.set('view engine', 'ejs');
-
-// set express to convert buffer into readable string
+// middleware setup
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.set('view engine', 'ejs');
 
 // database of short URLs and their corresponding long URLs
 const urlDatabase = {
@@ -31,6 +33,7 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
+// routes
 // route for no route to redirect to urls main page
 app.get('/', (req, res) => {
   res.redirect('/urls');
@@ -75,41 +78,41 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
-// handles POST request to delete a URL with the specified ID from the urlDatabase object
+// route to handle POST request to delete a URL with the specified ID from the urlDatabase object
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls');
 });
 
-//handles POST request to edit long url by updating long url in urlDatabase for current id
+// route to handle POST request to edit long url by updating long url in urlDatabase for current id
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   urlDatabase[id] = req.body.longURL;
   res.redirect('/urls');
 });
 
-//handles POST request to edit long url from homepage by redirecting to the edit page
+//route to handle POST request to edit long url from homepage by redirecting to the edit page
 app.post('/urls/:id/edit', (req, res) => {
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
 });
 
-// handles POST request to generate short url id, pair with user given long url, and add both to urlDatabase
+// route to  handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
   res.redirect(`/urls/${id}`);
 });
 
-// handles POST request to create cookie with username when user fills form in navbar
+// route to handle POST request to create cookie with username when user fills form in navbar
 app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
   res.redirect('/urls');
 })
 
-//handles POST request to clear username cookie when logout button is pressed
+// route to handle POST request to clear username cookie when logout button is pressed
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
