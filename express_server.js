@@ -10,10 +10,7 @@ authenticateUser } = require('./helpers');
 const PORT = 8080;
 
 // database of short URLs and their corresponding long URLs
-const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
-};
+const urlDatabase = {};
 
 // object to contain user information
 const users = {};
@@ -84,7 +81,7 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies.user_id],
   };
   return res.render('urls_show', templateVars);
@@ -92,7 +89,7 @@ app.get('/urls/:id', (req, res) => {
 
 // route to use short url id to redirect user to longURL site
 app.get('/u/:id', (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   if (!longURL) {
     return res.status(404).send('404 not found: requested url does not exist')
   }
@@ -115,7 +112,7 @@ app.post('/urls/:id/delete', (req, res) => {
 // route to handle POST request to edit long url by updating long url in urlDatabase for current id
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
-  urlDatabase[id] = req.body.longURL;
+  urlDatabase[id].longURL = req.body.longURL;
   return res.redirect('/urls');
 });
 
@@ -129,7 +126,10 @@ app.post('/urls/:id/edit', (req, res) => {
 app.post('/urls', (req, res) => {
   if (req.cookies.user_id) {
   const id = generateRandomString();
-  urlDatabase[id] = req.body.longURL;
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userID: req.cookies.user_id
+  };
   return res.redirect(`/urls/${id}`);
   };
 
