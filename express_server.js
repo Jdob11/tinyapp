@@ -1,7 +1,10 @@
 // dependencies
 const cookieParser = require('cookie-parser')
 const express = require('express');
-const { createNewUser, generateRandomString, findUserFromEmail } = require('./helpers');
+const { createNewUser,
+  generateRandomString,
+  findUserFromEmail,
+authenticateUser } = require('./helpers');
 
 // constants
 const PORT = 8080;
@@ -114,14 +117,13 @@ app.post('/urls', (req, res) => {
 
 // route to handle POST request to create cookie with user_id when user logs in to website
 app.post('/login', (req, res) => {
-  const user = findUserFromEmail(req.body.email, users);
-  if (!findUserFromEmail(req.body.email, users)) {
-    return res.status(403).send('No account associated with that e-mail exists.');
+  const loginInfo = { email: req.body.email, password: req.body.password };
+  const { error, user } = authenticateUser(loginInfo, users);
+
+  if (error) {
+    return res.status(403).send(error);
   }
-  const userID = user.id;
-  if (findUserFromEmail(req.body.email, users) && req.body.password !== users[userID].password) {
-    return res.status(403).send("Incorrect Password.");
-  };
+
   res.cookie('user_id', user.id);
   return res.redirect('/urls');
 });

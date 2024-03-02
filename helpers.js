@@ -18,6 +18,21 @@ const findUserFromEmail = (email, users) => {
   return Object.values(users).find(user => user.email === email) || null;
 };
 
+const authenticateUser = (loginInfo, users) => {
+  const { email, password } = loginInfo;
+  const user = findUserFromEmail(email, users);
+
+  if (!user) {
+    return { error: 'No account associated with that e-mail exists.', user: null };
+  }
+
+  if (user.password !== password) {
+    return { error: 'Incorrect Password.', user: null };
+  }
+
+  return { error: null, user };
+};
+
 const createNewUser = (userInfo, users) => {
   const { email, password } = userInfo;
 
@@ -42,5 +57,6 @@ const createNewUser = (userInfo, users) => {
 module.exports = {
   createNewUser,
   generateRandomString,
-  findUserFromEmail
+  findUserFromEmail,
+  authenticateUser
 }
