@@ -39,6 +39,14 @@ app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
+// route to display registration page to add new account
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username:req.cookies.username
+  };
+  res.render("register", templateVars);
+});
+
 // route to render the 'urls_index' template with urlDatabase
 app.get('/urls', (req, res) => {
   const templateVars = {
