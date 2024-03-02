@@ -13,8 +13,7 @@ const urlDatabase = {
 };
 
 // object to contain user information
-const users = {
-};
+const users = {};
 
 // initialize express
 const app = express();
@@ -25,7 +24,7 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 
 
-// routes
+// GET routes
 // route for no route to redirect to urls main page
 app.get('/', (req, res) => {
   res.redirect('/urls');
@@ -86,6 +85,7 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+// POST routes
 // route to handle POST request to delete a URL with the specified ID from the urlDatabase object
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
@@ -113,17 +113,26 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-// route to handle POST request to create cookie with username when user fills form in navbar
+// route to handle POST request to create cookie with user_id when user logs in to website
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
+  const user = findUserFromEmail(req.body.email, users);
+  if (!findUserFromEmail(req.body.email, users)) {
+    res.status(403).send('No account associated with that e-mail exists.');
+    return;
+  }
+  const userID = user.id;
+  if (findUserFromEmail(req.body.email, users) && req.body.password !== users[userID].password) {
+    res.status(403).send("Incorrect Password.");
+    return;
+  };
+  res.cookie('user_id', user.id);
   res.redirect('/urls');
-})
+});
 
-// route to handle POST request to clear username cookie when logout button is pressed
+// route to handle POST request to clear user_id cookie when logout button is pressed
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
+  res.clearCookie('user_id');
+  res.redirect('/login');
 })
 
 // route to handle POST request with user registration info
@@ -143,10 +152,10 @@ app.post('/register', (req, res) => {
     password: req.body.password
   };
   users[userId] = newUser;
-  res.cookie('user_id', userId);
-  res.redirect('/urls');
   console.log(users);
-})
+  // res.cookie('user_id', userId);
+  res.redirect('/urls');
+});
 
 // start the server and listen on the specified port
 app.listen(PORT, () => {
