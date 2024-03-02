@@ -93,6 +93,9 @@ app.get('/urls/:id', (req, res) => {
 // route to use short url id to redirect user to longURL site
 app.get('/u/:id', (req, res) => {
   const longURL = urlDatabase[req.params.id];
+  if (!longURL) {
+    return res.status(404).send('404 not found: requested url does not exist')
+  }
   return res.redirect(longURL);
 });
 
