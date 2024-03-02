@@ -34,11 +34,16 @@ app.get('/', (req, res) => {
 });
 
 // route to display registration page to add new account
-app.get("/register", (req, res) => {
+app.get('/register', (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
-  return res.render("register", templateVars);
+
+  if (req.cookies.user_id) {
+    return res.redirect('/urls');
+  }
+
+  return res.render('register', templateVars);
 });
 
 // route to display login page
@@ -46,6 +51,11 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
+
+  if (req.cookies.user_id) {
+    return res.redirect('/urls');
+  }
+  
   return res.render("login", templateVars);
 });
 
@@ -59,11 +69,11 @@ app.get('/urls', (req, res) => {
 });
 
 // route to display page to add new url to our database
-app.get("/urls/new", (req, res) => {
+app.get('/urls/new', (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
-  return res.render("urls_new", templateVars);
+  return res.render('urls_new', templateVars);
 });
 
 // route to render the 'urls_show' template with specific URL information
@@ -77,7 +87,7 @@ app.get('/urls/:id', (req, res) => {
 });
 
 // route to use short url id to redirect user to longURL site
-app.get("/u/:id", (req, res) => {
+app.get('/u/:id', (req, res) => {
   const longURL = urlDatabase[req.params.id];
   return res.redirect(longURL);
 });
@@ -142,7 +152,7 @@ app.post('/register', (req, res) => {
     return res.status(400).send(error);
   }
 
-  res.cookie('user_id', user.id);
+
   return res.redirect('/urls');
 });
 
