@@ -15,18 +15,12 @@ const generateRandomString = () => {
 };
 
 const findUserFromEmail = (email, users) => {
-  for (const userID in users) {
-    const user = users[userID];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
+  return Object.values(users).find(user => user.email === email) || null;
 };
 
 const createNewUser = (userInfo, users) => {
   const { email, password } = userInfo;
-  
+
   if (!email || !password) {
     return { error: "Please enter both an email and a password to register.", user: null };
   }
