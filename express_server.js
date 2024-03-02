@@ -39,6 +39,14 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+// route to display login page
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies.user_id],
+  };
+  res.render("login", templateVars);
+});
+
 // route to render the 'urls_index' template with urlDatabase
 app.get('/urls', (req, res) => {
   const templateVars = {
