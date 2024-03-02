@@ -5,6 +5,16 @@ const express = require('express');
 // constants
 const PORT = 8080;
 
+// database of short URLs and their corresponding long URLs
+const urlDatabase = {
+  'b2xVn2': 'http://www.lighthouselabs.ca',
+  '9sm5xK': 'http://www.google.com'
+};
+
+// object to contain user information
+const users = {
+};
+
 // function to generate random 6 character string for shortened url
 const generateRandomString = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -17,7 +27,17 @@ const generateRandomString = () => {
   }
   
   return result;
-}
+};
+
+const findUserFromEmail = (email) => {
+  for (const userID in users) {
+    const user = users[userID];
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+};
 
 // initialize express
 const app = express();
@@ -27,15 +47,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
-// database of short URLs and their corresponding long URLs
-const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
-};
-
-// object to contain user information
-const users = {
-};
 
 // routes
 // route for no route to redirect to urls main page
@@ -132,6 +143,14 @@ app.post('/logout', (req, res) => {
 
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400).send("You must include an e-mail and password");
+    return;
+  };
+  if (findUserFromEmail(req.body.email)) {
+    res.status(400).send('This e-mail already exists');
+    return;
+  }
   const userId = generateRandomString();
   const newUser = {
     id: userId,
@@ -141,6 +160,7 @@ app.post('/register', (req, res) => {
   users[userId] = newUser;
   res.cookie('user_id', userId);
   res.redirect('/urls');
+  console.log(users);
 })
 
 // start the server and listen on the specified port
