@@ -73,6 +73,10 @@ app.get('/urls/new', (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
+
+  if (!req.cookies.user_id) {
+    return res.redirect('/login');
+  }
   return res.render('urls_new', templateVars);
 });
 
@@ -118,11 +122,15 @@ app.post('/urls/:id/edit', (req, res) => {
   return res.redirect(`/urls/${id}`);
 });
 
-// route to  handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
+// route to handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
+  if (req.cookies.user_id) {
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
   return res.redirect(`/urls/${id}`);
+  };
+
+  return res.status(403).send('Only registered and logged in users can shorten urls');
 });
 
 // route to handle POST request to create cookie with user_id when user logs in to website
@@ -146,12 +154,11 @@ app.post('/logout', (req, res) => {
 
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
-  const { error, user } = createNewUser(req.body, users);
+  const { error } = createNewUser(req.body, users);
 
   if (error) {
     return res.status(400).send(error);
   }
-
 
   return res.redirect('/urls');
 });
