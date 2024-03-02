@@ -1,6 +1,6 @@
 const users = require('./express_server');
 
-// function to generate random 6 character string for shortened url
+// generate random 6 character string for shortened url
 const generateRandomString = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
@@ -14,10 +14,12 @@ const generateRandomString = () => {
   return result;
 };
 
+// search users database for user matching given email
 const findUserFromEmail = (email, users) => {
   return Object.values(users).find(user => user.email === email) || null;
 };
 
+// authenticate user based on login information
 const authenticateUser = (loginInfo, users) => {
   const { email, password } = loginInfo;
   const user = findUserFromEmail(email, users);
@@ -33,6 +35,7 @@ const authenticateUser = (loginInfo, users) => {
   return { error: null, user };
 };
 
+// create a new user in the user database
 const createNewUser = (userInfo, users) => {
   const { email, password } = userInfo;
 
@@ -54,9 +57,28 @@ const createNewUser = (userInfo, users) => {
   return { error: null, user: newUser };
 };
 
+// check if URL is valid (starts with 'http://' or 'https://')
+const isValidURL = (url) => {
+  return url.startsWith('http://') || url.startsWith('https://');
+};
+
+// add URL to the database
+const addURLToDatabase = (longURL, userID, urlDatabase) => {
+  if (!isValidURL(longURL)) {
+    return { error: 'Invalid URL. Please make sure the URL starts with http:// or https://', url: null };
+  }
+
+  const id = generateRandomString();
+  urlDatabase[id] = {
+    longURL: longURL,
+    userID: userID
+  };
+
+  return { error: null, url: { id: id } };
+};
+
 module.exports = {
   createNewUser,
-  generateRandomString,
-  findUserFromEmail,
-  authenticateUser
+  authenticateUser,
+  addURLToDatabase
 }

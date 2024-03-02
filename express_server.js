@@ -2,8 +2,7 @@
 const cookieParser = require('cookie-parser')
 const express = require('express');
 const { createNewUser,
-  generateRandomString,
-  findUserFromEmail,
+  addURLToDatabase,
 authenticateUser } = require('./helpers');
 
 // constants
@@ -124,16 +123,20 @@ app.post('/urls/:id/edit', (req, res) => {
 
 // route to handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
-  if (req.cookies.user_id) {
-  const id = generateRandomString();
-  urlDatabase[id] = {
-    longURL: req.body.longURL,
-    userID: req.cookies.user_id
-  };
-  return res.redirect(`/urls/${id}`);
-  };
+  const user_id = req.cookies.user_id;
+  const longURL = req.body.longURL
 
-  return res.status(403).send('Only registered and logged in users can shorten urls');
+  if (!user_id) {
+    return res.status(403).send('Only registered and logged-in users can shorten URLs');
+  }
+
+  const { error, url } = addURLToDatabase(longURL, user_id, urlDatabase);
+
+  if (error) {
+    return res.status(400).send(error);
+  }
+
+  return res.redirect(`/urls/${url.id}`);
 });
 
 // route to handle POST request to create cookie with user_id when user logs in to website
