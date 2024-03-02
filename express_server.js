@@ -33,6 +33,10 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
+// object to contain user information
+const users = {
+};
+
 // routes
 // route for no route to redirect to urls main page
 app.get('/', (req, res) => {
@@ -42,7 +46,7 @@ app.get('/', (req, res) => {
 // route to display registration page to add new account
 app.get("/register", (req, res) => {
   const templateVars = {
-    username:req.cookies.username
+    user: users[req.cookies.user_id],
   };
   res.render("register", templateVars);
 });
@@ -51,7 +55,7 @@ app.get("/register", (req, res) => {
 app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies.username
+    user:users[req.cookies.user_id]
   };
   res.render('urls_index', templateVars);
 });
@@ -59,7 +63,7 @@ app.get('/urls', (req, res) => {
 // route to display page to add new url to our database
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username:req.cookies.username
+    user: users[req.cookies.user_id],
   };
   res.render("urls_new", templateVars);
 });
@@ -70,7 +74,7 @@ app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username:req.cookies.username
+    user: users[req.cookies.user_id],
   };
   res.render('urls_show', templateVars);
 });
@@ -123,6 +127,19 @@ app.post('/login', (req, res) => {
 // route to handle POST request to clear username cookie when logout button is pressed
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
+  res.redirect('/urls');
+})
+
+// route to handle POST request with user registration info
+app.post('/register', (req, res) => {
+  const userId = generateRandomString();
+  const newUser = {
+    id: userId,
+    email: req.body.email,
+    password: req.body.password
+  };
+  users[userId] = newUser;
+  res.cookie('user_id', userId);
   res.redirect('/urls');
 })
 
