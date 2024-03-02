@@ -1,7 +1,7 @@
 // dependencies
 const cookieParser = require('cookie-parser')
 const express = require('express');
-const { generateRandomString, findUserFromEmail } = require('./helpers');
+const { createNewUser, generateRandomString, findUserFromEmail } = require('./helpers');
 
 // constants
 const PORT = 8080;
@@ -134,24 +134,13 @@ app.post('/logout', (req, res) => {
 
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
-  const { email, password } = req.body;
+  const { error, user } = createNewUser(req.body, users);
 
-  if (!email || !password) {
-    return res.status(400).send("Please enter both an email and a password to register.");
-  };
-
-  if (findUserFromEmail(email, users)) {
-    return res.status(400).send('This e-mail already exists');
+  if (error) {
+    return res.status(400).send(error);
   }
 
-  const userId = generateRandomString();
-  const newUser = {
-    id: userId,
-    email,
-    password
-  };
-  users[userId] = newUser;
-  res.cookie('user_id', userId);
+  res.cookie('user_id', user.id);
   return res.redirect('/urls');
 });
 

@@ -1,4 +1,4 @@
-const userObject = require('./express_server');
+const users = require('./express_server');
 
 // function to generate random 6 character string for shortened url
 const generateRandomString = () => {
@@ -14,9 +14,9 @@ const generateRandomString = () => {
   return result;
 };
 
-const findUserFromEmail = (email, userObject) => {
-  for (const userID in userObject) {
-    const user = userObject[userID];
+const findUserFromEmail = (email, users) => {
+  for (const userID in users) {
+    const user = users[userID];
     if (user.email === email) {
       return user;
     }
@@ -24,7 +24,29 @@ const findUserFromEmail = (email, userObject) => {
   return null;
 };
 
+const createNewUser = (userInfo, users) => {
+  const { email, password } = userInfo;
+  
+  if (!email || !password) {
+    return { error: "Please enter both an email and a password to register.", user: null };
+  }
+
+  if (findUserFromEmail(email, users)) {
+    return { error: 'This e-mail already exists', user: null };
+  }
+
+  const userId = generateRandomString();
+  const newUser = {
+    id: userId,
+    email,
+    password
+  };
+  users[userId] = newUser;
+  return { error: null, user: newUser };
+};
+
 module.exports = {
+  createNewUser,
   generateRandomString,
   findUserFromEmail
 }
