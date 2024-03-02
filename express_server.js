@@ -1,6 +1,7 @@
 // dependencies
 const cookieParser = require('cookie-parser')
 const express = require('express');
+const { generateRandomString, findUserFromEmail } = require('./helpers');
 
 // constants
 const PORT = 8080;
@@ -13,30 +14,6 @@ const urlDatabase = {
 
 // object to contain user information
 const users = {
-};
-
-// function to generate random 6 character string for shortened url
-const generateRandomString = () => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const charactersLength = characters.length;
-  const stringLength = 6;
-  
-  for (let i = 0; i < stringLength; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  
-  return result;
-};
-
-const findUserFromEmail = (email) => {
-  for (const userID in users) {
-    const user = users[userID];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
 };
 
 // initialize express
@@ -144,10 +121,10 @@ app.post('/logout', (req, res) => {
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
-    res.status(400).send("You must include an e-mail and password");
+    res.status(400).send("Please enter both an email and a password to register.");
     return;
   };
-  if (findUserFromEmail(req.body.email)) {
+  if (findUserFromEmail(req.body.email, users)) {
     res.status(400).send('This e-mail already exists');
     return;
   }
@@ -167,3 +144,7 @@ app.post('/register', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Tinyapp server listening on port ${PORT}!`);
 });
+
+module.exports = {
+  users,
+};
