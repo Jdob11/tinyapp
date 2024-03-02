@@ -27,7 +27,7 @@ app.set('view engine', 'ejs');
 // GET routes
 // route for no route to redirect to urls main page
 app.get('/', (req, res) => {
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 
 // route to display registration page to add new account
@@ -35,7 +35,7 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
-  res.render("register", templateVars);
+  return res.render("register", templateVars);
 });
 
 // route to display login page
@@ -43,7 +43,7 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
-  res.render("login", templateVars);
+  return res.render("login", templateVars);
 });
 
 // route to render the 'urls_index' template with urlDatabase
@@ -52,7 +52,7 @@ app.get('/urls', (req, res) => {
     urls: urlDatabase,
     user:users[req.cookies.user_id]
   };
-  res.render('urls_index', templateVars);
+  return res.render('urls_index', templateVars);
 });
 
 // route to display page to add new url to our database
@@ -60,29 +60,28 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
   };
-  res.render("urls_new", templateVars);
+  return res.render("urls_new", templateVars);
 });
 
 // route to render the 'urls_show' template with specific URL information
 app.get('/urls/:id', (req, res) => {
-  console.log(req.params);
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
     user: users[req.cookies.user_id],
   };
-  res.render('urls_show', templateVars);
+  return res.render('urls_show', templateVars);
 });
 
 // route to use short url id to redirect user to longURL site
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  return res.redirect(longURL);
 });
 
 // route to return the urlDatabase object as JSON
 app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
+  return res.json(urlDatabase);
 });
 
 // POST routes
@@ -90,71 +89,70 @@ app.get('/urls.json', (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 
 // route to handle POST request to edit long url by updating long url in urlDatabase for current id
 app.post('/urls/:id', (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   urlDatabase[id] = req.body.longURL;
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 
 //route to handle POST request to edit long url from homepage by redirecting to the edit page
 app.post('/urls/:id/edit', (req, res) => {
-  const id = req.params.id;
-  res.redirect(`/urls/${id}`);
+  const { id } = req.params;
+  return res.redirect(`/urls/${id}`);
 });
 
 // route to  handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
-  res.redirect(`/urls/${id}`);
+  return res.redirect(`/urls/${id}`);
 });
 
 // route to handle POST request to create cookie with user_id when user logs in to website
 app.post('/login', (req, res) => {
   const user = findUserFromEmail(req.body.email, users);
   if (!findUserFromEmail(req.body.email, users)) {
-    res.status(403).send('No account associated with that e-mail exists.');
-    return;
+    return res.status(403).send('No account associated with that e-mail exists.');
   }
   const userID = user.id;
   if (findUserFromEmail(req.body.email, users) && req.body.password !== users[userID].password) {
-    res.status(403).send("Incorrect Password.");
-    return;
+    return res.status(403).send("Incorrect Password.");
   };
   res.cookie('user_id', user.id);
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 
 // route to handle POST request to clear user_id cookie when logout button is pressed
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/login');
+  return res.redirect('/login');
 })
 
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
-  if (req.body.email.trim() === "" || req.body.password.trim() === "") {
-    res.status(400).send("Please enter both an email and a password to register.");
-    return;
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send("Please enter both an email and a password to register.");
   };
-  if (findUserFromEmail(req.body.email, users)) {
-    res.status(400).send('This e-mail already exists');
-    return;
+
+  if (findUserFromEmail(email, users)) {
+    return res.status(400).send('This e-mail already exists');
   }
+
   const userId = generateRandomString();
   const newUser = {
     id: userId,
-    email: req.body.email,
-    password: req.body.password
+    email,
+    password
   };
   users[userId] = newUser;
-  console.log(users);
-  // res.cookie('user_id', userId);
-  res.redirect('/urls');
+  res.cookie('user_id', userId);
+  return res.redirect('/urls');
 });
 
 // start the server and listen on the specified port
