@@ -120,7 +120,7 @@ app.post('/logout', (req, res) => {
 
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
-  if (req.body.email === "" || req.body.password === "") {
+  if (req.body.email.trim() === "" || req.body.password.trim() === "") {
     res.status(400).send("Please enter both an email and a password to register.");
     return;
   };
