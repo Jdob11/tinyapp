@@ -115,6 +115,13 @@ app.post('/urls/:id/delete', (req, res) => {
 // route to handle POST request to edit long url by updating long url in urlDatabase for current id
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
+  const user_id = req.cookies.user_id;
+  const longURL = req.body.longURL
+  const { error } = addURLToDatabase(longURL, user_id, urlDatabase);
+  
+  if (error) {
+    return res.status(400).send(error);
+  }
   urlDatabase[id].longURL = req.body.longURL;
   return res.redirect('/urls');
 });

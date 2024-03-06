@@ -1,5 +1,3 @@
-const users = require('./express_server');
-
 // generate random 6 character string for shortened url
 const generateRandomString = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -77,8 +75,39 @@ const addURLToDatabase = (longURL, userID, urlDatabase) => {
   return { error: null, url: { id: id } };
 };
 
+// retrieve only urls that belong to logged in user
+const urlsForUser = (currentUser, urlDatabase) => {
+  const userURLs = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === currentUser)
+    userURLs[shortURL] = urlDatabase[shortURL];
+  }
+
+  if (Object.keys(userURLs).length === 0) {
+    const error = '<h3>No URLs found for the current user.</h3>\nPlease add some <a href="/urls/new">URLs.</a>';
+    return { error, userURLs: null};
+  }
+  return { error: null, userURLs };
+};
+
+// const urlDatabaseTest = {
+//   b6UTxQ: {
+//     longURL: "https://www.tsn.ca",
+//     userID: "aJ48lW",
+//   },
+//   i3BoGr: {
+//     longURL: "https://www.google.ca",
+//     userID: "aJ48lW",
+//   },
+// };
+
+// const user1 = "aJ48lW";
+
+// console.log(urlsForUser(user1, urlDatabaseTest));
+
 module.exports = {
   createNewUser,
   authenticateUser,
-  addURLToDatabase
+  addURLToDatabase,
+  urlsForUser
 }
