@@ -17,6 +17,11 @@ const findUserFromEmail = (email, users) => {
   return Object.values(users).find(user => user.email === email) || null;
 };
 
+// search if id in url exists in urlDatabase
+const findIdInDatabase = (id, urlDatabase) => {
+  return Object.keys(urlDatabase).find(url => url === id) || null;
+};
+
 // authenticate user based on login information
 const authenticateUser = (loginInfo, users) => {
   const { email, password } = loginInfo;
@@ -80,7 +85,7 @@ const urlsForUser = (currentUser, urlDatabase) => {
   const userURLs = {};
   for (const shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userID === currentUser)
-    userURLs[shortURL] = urlDatabase[shortURL];
+      userURLs[shortURL] = urlDatabase[shortURL];
   }
 
   if (Object.keys(userURLs).length === 0) {
@@ -90,24 +95,10 @@ const urlsForUser = (currentUser, urlDatabase) => {
   return { error: null, userURLs };
 };
 
-// const urlDatabaseTest = {
-//   b6UTxQ: {
-//     longURL: "https://www.tsn.ca",
-//     userID: "aJ48lW",
-//   },
-//   i3BoGr: {
-//     longURL: "https://www.google.ca",
-//     userID: "aJ48lW",
-//   },
-// };
-
-// const user1 = "aJ48lW";
-
-// console.log(urlsForUser(user1, urlDatabaseTest));
-
 module.exports = {
   createNewUser,
   authenticateUser,
   addURLToDatabase,
-  urlsForUser
-}
+  urlsForUser,
+  findIdInDatabase
+};

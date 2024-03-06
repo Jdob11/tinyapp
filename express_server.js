@@ -1,10 +1,11 @@
 // dependencies
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const { createNewUser,
   addURLToDatabase,
   authenticateUser,
-  urlsForUser } = require('./helpers');
+  urlsForUser,
+  findIdInDatabase } = require('./helpers');
 
 // constants
 const PORT = 8080;
@@ -59,17 +60,20 @@ app.get("/login", (req, res) => {
 // route to render the 'urls_index' template with urlDatabase
 app.get('/urls', (req, res) => {
   const userId = req.cookies.user_id;
-  const { error, userURLs } = urlsForUser(userId, urlDatabase)
+  const { error, userURLs } = urlsForUser(userId, urlDatabase);
   const templateVars = {
     urls: userURLs,
     user:users[userId]
   };
-  if (error) {
-    return res.status(403).send(error);
-  }
+
   if (!userId) {
     return res.status(403).send('<h3>You must be <a href="/login">logged in</a> to view URLs.</h3>');
   }
+
+  if (error) {
+    return res.status(403).send(error);
+  }
+
   return res.render('urls_index', templateVars);
 });
 
@@ -87,22 +91,26 @@ app.get('/urls/new', (req, res) => {
 
 // route to render the 'urls_show' template with specific URL information
 app.get('/urls/:id', (req, res) => {
+  const userId = req.cookies.user_id;
+  const id = req.params.id;
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies.user_id],
   };
-  const user_id = req.cookies.user_id;
-  const id = req.params.id;
-
-  if (!user_id) {
-    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
-  };
   
-  if (user_id !== urlDatabase[id].userID) {
+  if (!findIdInDatabase(id, urlDatabase)) {
+    return res.status(403).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+  }
+  
+  if (!userId) {
+    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+  }
+  
+  if (userId !== urlDatabase[id].userID) {
     return res.status(403).send('<h3>Users can only view URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
   }
-
+  
   return res.render('urls_show', templateVars);
 });
 
@@ -110,7 +118,7 @@ app.get('/urls/:id', (req, res) => {
 app.get('/u/:id', (req, res) => {
   const longURL = urlDatabase[req.params.id].longURL;
   if (!longURL) {
-    return res.status(404).send('404 not found: requested url does not exist')
+    return res.status(404).send('404 not found: requested url does not exist');
   }
   return res.redirect(longURL);
 });
@@ -124,6 +132,19 @@ app.get('/urls.json', (req, res) => {
 // route to handle POST request to delete a URL with the specified ID from the urlDatabase object
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
+  
+  if (!userId) {
+    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+  }
+  
+  if (userId !== urlDatabase[id].userID) {
+    return res.status(403).send('<h3>Users can only view or edit URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+  }
+
+  if (!findIdInDatabase(id, urlDatabase)) {
+    return res.status(403).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+  }
+
   delete urlDatabase[id];
   return res.redirect('/urls');
 });
@@ -131,13 +152,26 @@ app.post('/urls/:id/delete', (req, res) => {
 // route to handle POST request to edit long url by updating long url in urlDatabase for current id
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
-  const user_id = req.cookies.user_id;
-  const longURL = req.body.longURL
-  const { error } = addURLToDatabase(longURL, user_id, urlDatabase);
+  const userId = req.cookies.user_id;
+  const longURL = null;
+  const { error } = addURLToDatabase(longURL, userId, urlDatabase);
   
   if (error) {
     return res.status(400).send(error);
   }
+
+  if (!userId) {
+    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+  }
+  
+  if (userId !== urlDatabase[id].userID) {
+    return res.status(403).send('<h3>Users can only view or edit URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+  }
+
+  if (!findIdInDatabase(id, urlDatabase)) {
+    return res.status(403).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+  }
+
   urlDatabase[id].longURL = req.body.longURL;
   return res.redirect('/urls');
 });
@@ -150,14 +184,14 @@ app.post('/urls/:id/edit', (req, res) => {
 
 // route to handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
-  const user_id = req.cookies.user_id;
-  const longURL = req.body.longURL
+  const userId = req.cookies.user_id;
+  const longURL = req.body.longURL;
 
-  if (!user_id) {
+  if (!userId) {
     return res.status(403).send('<h3>You must be logged in to create URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
-  };
+  }
 
-  const { error, url } = addURLToDatabase(longURL, user_id, urlDatabase);
+  const { error, url } = addURLToDatabase(longURL, userId, urlDatabase);
 
   if (error) {
     return res.status(400).send(error);
@@ -183,7 +217,7 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   return res.redirect('/login');
-})
+});
 
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
