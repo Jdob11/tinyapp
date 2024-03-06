@@ -25,11 +25,11 @@ const authenticateUser = (loginInfo, users) => {
   const user = findUserFromEmail(email, users);
 
   if (!user) {
-    return { error: 'No account associated with that e-mail exists.', user: null };
+    return { error: '<h3>No account associated with that e-mail exists.</h3>\nPlease <a href="/register">register.', user: null };
   }
 
   if (user.password !== password) {
-    return { error: 'Incorrect Password.', user: null };
+    return { error: '<h3>Incorrect Password.</h3>\nPlease <a href="/login">try again.</a>', user: null };
   }
 
   return { error: null, user };
@@ -40,11 +40,11 @@ const createNewUser = (userInfo, users) => {
   const { email, password } = userInfo;
 
   if (!email || !password) {
-    return { error: "Please enter both an email and a password to register.", user: null };
+    return { error: '<h3>You must enter both an email and a password to register.</h3> \nPlease <a href="/register">try again.</a>', user: null };
   }
 
   if (findUserFromEmail(email, users)) {
-    return { error: 'This e-mail already exists', user: null };
+    return { error: '<h3>This e-mail already exists</h3>\nPlease <a href="/register">try again</a> with a new email.', user: null };
   }
 
   const userId = generateRandomString();
@@ -65,7 +65,7 @@ const isValidURL = (url) => {
 // add URL to the database
 const addURLToDatabase = (longURL, userID, urlDatabase) => {
   if (!isValidURL(longURL)) {
-    return { error: 'Invalid URL. Please make sure the URL starts with http:// or https://', url: null };
+    return { error: '<h3>Invalid URL.</h3>\n<h5>The URL must start with http:// or https://</h5>\nPlease <a href="/urls/new">try again.</a>', url: null };
   }
 
   const id = generateRandomString();

@@ -57,10 +57,14 @@ app.get("/login", (req, res) => {
 
 // route to render the 'urls_index' template with urlDatabase
 app.get('/urls', (req, res) => {
+  const userId = req.cookies.user_id;
   const templateVars = {
     urls: urlDatabase,
-    user:users[req.cookies.user_id]
+    user:users[userId]
   };
+  if (!userId) {
+    return res.status(403).send('<h3>You must be <a href="/login">logged in</a> to view URLs.</h3>');
+  }
   return res.render('urls_index', templateVars);
 });
 
@@ -127,8 +131,8 @@ app.post('/urls', (req, res) => {
   const longURL = req.body.longURL
 
   if (!user_id) {
-    return res.status(403).send('Only registered and logged-in users can shorten URLs');
-  }
+    return res.status(403).send('<h3>You must be logged in to create URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+  };
 
   const { error, url } = addURLToDatabase(longURL, user_id, urlDatabase);
 
@@ -166,7 +170,7 @@ app.post('/register', (req, res) => {
     return res.status(400).send(error);
   }
 
-  return res.redirect('/urls');
+  return res.redirect('/login');
 });
 
 // start the server and listen on the specified port
