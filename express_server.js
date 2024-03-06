@@ -3,7 +3,8 @@ const cookieParser = require('cookie-parser')
 const express = require('express');
 const { createNewUser,
   addURLToDatabase,
-authenticateUser } = require('./helpers');
+  authenticateUser,
+  urlsForUser } = require('./helpers');
 
 // constants
 const PORT = 8080;
@@ -58,10 +59,14 @@ app.get("/login", (req, res) => {
 // route to render the 'urls_index' template with urlDatabase
 app.get('/urls', (req, res) => {
   const userId = req.cookies.user_id;
+  const { error, userURLs } = urlsForUser(userId, urlDatabase)
   const templateVars = {
-    urls: urlDatabase,
+    urls: userURLs,
     user:users[userId]
   };
+  if (error) {
+    return res.status(403).send(error);
+  }
   if (!userId) {
     return res.status(403).send('<h3>You must be <a href="/login">logged in</a> to view URLs.</h3>');
   }
@@ -87,6 +92,17 @@ app.get('/urls/:id', (req, res) => {
     longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies.user_id],
   };
+  const user_id = req.cookies.user_id;
+  const id = req.params.id;
+
+  if (!user_id) {
+    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+  };
+  
+  if (user_id !== urlDatabase[id].userID) {
+    return res.status(403).send('<h3>Users can only view URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+  }
+
   return res.render('urls_show', templateVars);
 });
 
