@@ -15,7 +15,7 @@ const generateRandomString = () => {
 };
 
 // search users database for user matching given email
-const findUserFromEmail = (email, users) => {
+const getUserByEmail = (email, users) => {
   return Object.values(users).find(user => user.email === email) || null;
 };
 
@@ -27,7 +27,7 @@ const findIdInDatabase = (id, urlDatabase) => {
 // authenticate user based on login information
 const authenticateUser = (loginInfo, users) => {
   const { email, password } = loginInfo;
-  const user = findUserFromEmail(email, users);
+  const user = getUserByEmail(email, users);
   const passwordCheck = bcrypt.compareSync(password, user.password);
 
   if (!user) {
@@ -44,12 +44,13 @@ const authenticateUser = (loginInfo, users) => {
 // create a new user in the user database
 const createNewUser = (userInfo, users) => {
   const { email, password } = userInfo;
+  const emailCheck = getUserByEmail(email, users);
 
   if (!email || !password) {
     return { error: '<h3>You must enter both an email and a password to register.</h3> \nPlease <a href="/register">try again.</a>', user: null };
   }
 
-  if (findUserFromEmail(email, users)) {
+  if (emailCheck) {
     return { error: '<h3>This e-mail already exists</h3>\nPlease <a href="/register">try again</a> with a new email.', user: null };
   }
 
