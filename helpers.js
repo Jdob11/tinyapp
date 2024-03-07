@@ -60,17 +60,8 @@ const createNewUser = (userInfo, users) => {
   return { error: null, user: newUser };
 };
 
-// check if URL is valid (starts with 'http://' or 'https://')
-const isValidURL = (url) => {
-  return url.startsWith('http://') || url.startsWith('https://');
-};
-
 // add URL to the database
 const addURLToDatabase = (longURL, userID, urlDatabase) => {
-  if (!isValidURL(longURL)) {
-    return { error: '<h3>Invalid URL.</h3>\n<h5>The URL must start with http:// or https://</h5>\nPlease <a href="/urls/new">try again.</a>', url: null };
-  }
-
   const id = generateRandomString();
   urlDatabase[id] = {
     longURL: longURL,

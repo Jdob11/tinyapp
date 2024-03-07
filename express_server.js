@@ -116,12 +116,20 @@ app.get('/urls/:id', (req, res) => {
 
 // route to use short url id to redirect user to longURL site
 app.get('/u/:id', (req, res) => {
-  const longURL = urlDatabase[req.params.id].longURL;
+  const shortURL = req.params.id;
+  let longURL = urlDatabase[shortURL] ? urlDatabase[shortURL].longURL : null;
+
   if (!longURL) {
-    return res.status(404).send('404 not found: requested url does not exist');
+    return res.status(404).send('404 not found: requested URL does not exist');
   }
+
+  if (!longURL.startsWith('http://') && !longURL.startsWith('https://')) {
+    longURL = 'http://' + longURL;
+  }
+
   return res.redirect(longURL);
 });
+
 
 // route to return the urlDatabase object as JSON
 app.get('/urls.json', (req, res) => {
@@ -154,12 +162,6 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
   const userId = req.cookies.user_id;
-  // const longURL = null;
-  const { error } = addURLToDatabase(longURL, userId, urlDatabase);
-  
-  if (error) {
-    return res.status(400).send(error);
-  }
 
   if (!userId) {
     return res.status(403).send('You must be logged in to view and edit URLs.');
