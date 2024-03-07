@@ -131,7 +131,6 @@ app.get('/u/:id', (req, res) => {
   return res.redirect(longURL);
 });
 
-
 // route to return the urlDatabase object as JSON
 app.get('/urls.json', (req, res) => {
   return res.json(urlDatabase);

@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+
 // generate random 6 character string for shortened url
 const generateRandomString = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -26,12 +28,13 @@ const findIdInDatabase = (id, urlDatabase) => {
 const authenticateUser = (loginInfo, users) => {
   const { email, password } = loginInfo;
   const user = findUserFromEmail(email, users);
+  const passwordCheck = bcrypt.compareSync(password, user.password);
 
   if (!user) {
     return { error: '<h3>No account associated with that e-mail exists.</h3>\nPlease <a href="/register">register.', user: null };
   }
 
-  if (user.password !== password) {
+  if (!passwordCheck) {
     return { error: '<h3>Incorrect Password.</h3>\nPlease <a href="/login">try again.</a>', user: null };
   }
 
@@ -50,13 +53,15 @@ const createNewUser = (userInfo, users) => {
     return { error: '<h3>This e-mail already exists</h3>\nPlease <a href="/register">try again</a> with a new email.', user: null };
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const userId = generateRandomString();
   const newUser = {
     id: userId,
     email,
-    password
+    password: hashedPassword
   };
   users[userId] = newUser;
+  console.log(newUser);
   return { error: null, user: newUser };
 };
 
