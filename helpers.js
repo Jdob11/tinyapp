@@ -61,7 +61,6 @@ const createNewUser = (userInfo, users) => {
     password: hashedPassword
   };
   users[userId] = newUser;
-  console.log(newUser);
   return { error: null, user: newUser };
 };
 

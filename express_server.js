@@ -1,5 +1,5 @@
 // dependencies
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const express = require('express');
 const { createNewUser,
   addURLToDatabase,
@@ -21,7 +21,13 @@ const app = express();
 
 // middleware setup
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['banana', 'mongoose', 'typewriter'],
+
+  // cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 app.set('view engine', 'ejs');
 
 // GET routes
@@ -33,10 +39,10 @@ app.get('/', (req, res) => {
 // route to display registration page to add new account
 app.get('/register', (req, res) => {
   const templateVars = {
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
   };
 
-  if (req.cookies.user_id) {
+  if (req.session.user_id) {
     return res.redirect('/urls');
   }
 
@@ -46,10 +52,10 @@ app.get('/register', (req, res) => {
 // route to display login page
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
   };
 
-  if (req.cookies.user_id) {
+  if (req.session.user_id) {
     return res.redirect('/urls');
   }
   
@@ -58,7 +64,7 @@ app.get("/login", (req, res) => {
 
 // route to render the 'urls_index' template with urlDatabase
 app.get('/urls', (req, res) => {
-  const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   const { error, userURLs } = urlsForUser(userId, urlDatabase);
   const templateVars = {
     urls: userURLs,
@@ -79,10 +85,10 @@ app.get('/urls', (req, res) => {
 // route to display page to add new url to our database
 app.get('/urls/new', (req, res) => {
   const templateVars = {
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
   };
 
-  if (!req.cookies.user_id) {
+  if (!req.session.user_id) {
     return res.redirect('/login');
   }
   return res.render('urls_new', templateVars);
@@ -90,7 +96,7 @@ app.get('/urls/new', (req, res) => {
 
 // route to render the 'urls_show' template with specific URL information
 app.get('/urls/:id', (req, res) => {
-  const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   const id = req.params.id;
   const urlExists = findIdInDatabase(id, urlDatabase);
   
@@ -109,7 +115,7 @@ app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.cookies.user_id],
+    user: users[req.session.user_id],
   };
   
   return res.render('urls_show', templateVars);
@@ -140,8 +146,7 @@ app.get('/urls.json', (req, res) => {
 // route to handle POST request to delete a URL with the specified ID from the urlDatabase object
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
-  const userId = req.cookies.user_id;
-  console.log(req.cookies);
+  const userId = req.session.user_id;
   if (!userId) {
     return res.status(403).send('You must be logged in to view and edit URLs.');
   }
@@ -161,7 +166,7 @@ app.post('/urls/:id/delete', (req, res) => {
 // route to handle POST request to edit long url by updating long url in urlDatabase for current id
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
-  const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
 
   if (!userId) {
     return res.status(403).send('You must be logged in to view and edit URLs.');
@@ -187,7 +192,7 @@ app.post('/urls/:id/edit', (req, res) => {
 
 // route to handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
-  const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   const longURL = req.body.longURL;
 
   if (!userId) {
@@ -212,13 +217,13 @@ app.post('/login', (req, res) => {
     return res.status(403).send(error);
   }
 
-  res.cookie('user_id', user.id);
+  req.session.user_id = user.id;
   return res.redirect('/urls');
 });
 
 // route to handle POST request to clear user_id cookie when logout button is pressed
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   return res.redirect('/login');
 });
 
