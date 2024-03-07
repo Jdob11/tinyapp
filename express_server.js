@@ -132,17 +132,18 @@ app.get('/urls.json', (req, res) => {
 // route to handle POST request to delete a URL with the specified ID from the urlDatabase object
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
-  
+  const userId = req.cookies.user_id;
+  console.log(req.cookies);
   if (!userId) {
-    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+    return res.status(403).send('You must be logged in to view and edit URLs.');
   }
   
   if (userId !== urlDatabase[id].userID) {
-    return res.status(403).send('<h3>Users can only view or edit URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+    return res.status(403).send('Users can only view or edit URLs belonging to themselves.');
   }
 
   if (!findIdInDatabase(id, urlDatabase)) {
-    return res.status(403).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+    return res.status(403).send('The requested URL does not exist.');
   }
 
   delete urlDatabase[id];
@@ -153,7 +154,7 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
   const userId = req.cookies.user_id;
-  const longURL = null;
+  // const longURL = null;
   const { error } = addURLToDatabase(longURL, userId, urlDatabase);
   
   if (error) {
@@ -161,15 +162,15 @@ app.post('/urls/:id', (req, res) => {
   }
 
   if (!userId) {
-    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+    return res.status(403).send('You must be logged in to view and edit URLs.');
   }
   
   if (userId !== urlDatabase[id].userID) {
-    return res.status(403).send('<h3>Users can only view or edit URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+    return res.status(403).send('Users can only view or edit URLs belonging to themselves.');
   }
 
   if (!findIdInDatabase(id, urlDatabase)) {
-    return res.status(403).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+    return res.status(403).send('The requested URL does not exist.');
   }
 
   urlDatabase[id].longURL = req.body.longURL;
@@ -188,7 +189,7 @@ app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
 
   if (!userId) {
-    return res.status(403).send('<h3>You must be logged in to create URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+    return res.status(403).send('You must be logged in to create URLs.');
   }
 
   const { error, url } = addURLToDatabase(longURL, userId, urlDatabase);
