@@ -24,7 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
-
 // GET routes
 // route for no route to redirect to urls main page
 app.get('/', (req, res) => {
@@ -93,13 +92,9 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:id', (req, res) => {
   const userId = req.cookies.user_id;
   const id = req.params.id;
-  const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.cookies.user_id],
-  };
+  const urlExists = findIdInDatabase(id, urlDatabase);
   
-  if (!findIdInDatabase(id, urlDatabase)) {
+  if (!urlExists) {
     return res.status(403).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
   }
   
@@ -110,6 +105,12 @@ app.get('/urls/:id', (req, res) => {
   if (userId !== urlDatabase[id].userID) {
     return res.status(403).send('<h3>Users can only view URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
   }
+  
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id].longURL,
+    user: users[req.cookies.user_id],
+  };
   
   return res.render('urls_show', templateVars);
 });
