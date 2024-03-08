@@ -39,10 +39,10 @@ app.get('/', (req, res) => {
 // route to display registration page to add new account
 app.get('/register', (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id],
+    user: users[req.session.userId],
   };
 
-  if (req.session.user_id) {
+  if (req.session.userId) {
     return res.redirect('/urls');
   }
 
@@ -52,10 +52,10 @@ app.get('/register', (req, res) => {
 // route to display login page
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id],
+    user: users[req.session.userId],
   };
 
-  if (req.session.user_id) {
+  if (req.session.userId) {
     return res.redirect('/urls');
   }
   
@@ -64,7 +64,7 @@ app.get("/login", (req, res) => {
 
 // route to render the 'urls_index' template with urlDatabase
 app.get('/urls', (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
   const { error, userURLs } = urlsForUser(userId, urlDatabase);
   const templateVars = {
     urls: userURLs,
@@ -85,10 +85,10 @@ app.get('/urls', (req, res) => {
 // route to display page to add new url to our database
 app.get('/urls/new', (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id],
+    user: users[req.session.userId],
   };
 
-  if (!req.session.user_id) {
+  if (!req.session.userId) {
     return res.redirect('/login');
   }
   return res.render('urls_new', templateVars);
@@ -96,7 +96,7 @@ app.get('/urls/new', (req, res) => {
 
 // route to render the 'urls_show' template with specific URL information
 app.get('/urls/:id', (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
   const id = req.params.id;
   const urlExists = findIdInDatabase(id, urlDatabase);
   
@@ -115,7 +115,7 @@ app.get('/urls/:id', (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.session.user_id],
+    user: users[req.session.userId],
   };
   
   return res.render('urls_show', templateVars);
@@ -146,7 +146,7 @@ app.get('/urls.json', (req, res) => {
 // route to handle POST request to delete a URL with the specified ID from the urlDatabase object
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
   if (!userId) {
     return res.status(403).send('You must be logged in to view and edit URLs.');
   }
@@ -166,7 +166,7 @@ app.post('/urls/:id/delete', (req, res) => {
 // route to handle POST request to edit long url by updating long url in urlDatabase for current id
 app.post('/urls/:id', (req, res) => {
   const { id } = req.params;
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
 
   if (!userId) {
     return res.status(403).send('You must be logged in to view and edit URLs.');
@@ -192,7 +192,7 @@ app.post('/urls/:id/edit', (req, res) => {
 
 // route to handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
 app.post('/urls', (req, res) => {
-  const userId = req.session.user_id;
+  const userId = req.session.userId;
   const longURL = req.body.longURL;
 
   if (!userId) {
@@ -208,7 +208,7 @@ app.post('/urls', (req, res) => {
   return res.redirect(`/urls/${url.id}`);
 });
 
-// route to handle POST request to create cookie with user_id when user logs in to website
+// route to handle POST request to create cookie with userId when user logs in to website
 app.post('/login', (req, res) => {
   const loginInfo = { email: req.body.email, password: req.body.password };
   const { error, user } = authenticateUser(loginInfo, users);
@@ -217,11 +217,11 @@ app.post('/login', (req, res) => {
     return res.status(403).send(error);
   }
 
-  req.session.user_id = user.id;
+  req.session.userId = user.id;
   return res.redirect('/urls');
 });
 
-// route to handle POST request to clear user_id cookie when logout button is pressed
+// route to handle POST request to clear userId cookie when logout button is pressed
 app.post('/logout', (req, res) => {
   req.session = null;
   return res.redirect('/login');

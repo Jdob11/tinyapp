@@ -34,11 +34,12 @@ describe('getUserByEmail', () => {
   it('should return a user with valid email', () => {
     const user = getUserByEmail('user@example.com', testUsers);
     assert.exists(user.email);
+    assert.strictEqual('user@example.com', user.email)
   });
 
   it('should return a undefined with invalid email', () => {
     const user = getUserByEmail('nonuser@example.com', testUsers);
-    assert.isUndefined(user);
+    assert.isUndefined(user, 'User should be undefined for non-existing email');
   });
 });
 
