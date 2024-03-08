@@ -108,7 +108,7 @@ app.get('/urls/:id', (req, res) => {
     return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
   }
   
-  if (userId !== urlDatabase[id].userID) {
+  if (userId !== urlDatabase[id].userId) {
     return res.status(403).send('<h3>Users can only view URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
   }
   
@@ -151,7 +151,7 @@ app.post('/urls/:id/delete', (req, res) => {
     return res.status(403).send('You must be logged in to view and edit URLs.');
   }
   
-  if (userId !== urlDatabase[id].userID) {
+  if (userId !== urlDatabase[id].userId) {
     return res.status(403).send('Users can only view or edit URLs belonging to themselves.');
   }
 
@@ -172,7 +172,7 @@ app.post('/urls/:id', (req, res) => {
     return res.status(403).send('You must be logged in to view and edit URLs.');
   }
   
-  if (userId !== urlDatabase[id].userID) {
+  if (userId !== urlDatabase[id].userId) {
     return res.status(403).send('Users can only view or edit URLs belonging to themselves.');
   }
 

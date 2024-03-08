@@ -45,8 +45,8 @@ describe('getUserByEmail', () => {
 
 describe('findIdInDatabase', () => {
   const urlDatabase = {
-    'abc123': { longURL: 'https://example.com', userID: 'user1' },
-    'def456': { longURL: 'https://google.com', userID: 'user2' }
+    'abc123': { longURL: 'https://example.com', userId: 'user1' },
+    'def456': { longURL: 'https://google.com', userId: 'user2' }
   };
 
   it('should return the ID if it exists in the database', () => {
@@ -108,23 +108,23 @@ describe('createNewUser', () => {
 
 describe('addURLToDatabase', () => {
   const urlDatabase = {
-    'abc123': { longURL: 'https://example.com', userID: 'user1' },
-    'def456': { longURL: 'https://google.com', userID: 'user2' }
+    'abc123': { longURL: 'https://example.com', userId: 'user1' },
+    'def456': { longURL: 'https://google.com', userId: 'user2' }
   };
 
   it('should add a new URL to the database', () => {
     const longURL = 'https://github.com';
-    const userID = 'user2';
-    const result = addURLToDatabase(longURL, userID, urlDatabase);
-    assert.deepEqual(urlDatabase[result.url.id], { longURL: longURL, userID: userID });
+    const userId = 'user2';
+    const result = addURLToDatabase(longURL, userId, urlDatabase);
+    assert.deepEqual(urlDatabase[result.url.id], { longURL: longURL, userId: userId });
   });
 });
 
 describe('urlsForUser', () => {
   const urlDatabase = {
-    'abc123': { longURL: 'https://example.com', userID: 'user1' },
-    'def456': { longURL: 'https://google.com', userID: 'user2' },
-    'ghi789': { longURL: 'https://github.com', userID: 'user1' }
+    'abc123': { longURL: 'https://example.com', userId: 'user1' },
+    'def456': { longURL: 'https://google.com', userId: 'user2' },
+    'ghi789': { longURL: 'https://github.com', userId: 'user1' }
   };
 
   it('should return user URLs if found', () => {
@@ -132,8 +132,8 @@ describe('urlsForUser', () => {
     const result = urlsForUser(currentUser, urlDatabase);
     assert.isNull(result.error);
     assert.deepEqual(result.userURLs, {
-      'abc123': { longURL: 'https://example.com', userID: 'user1' },
-      'ghi789': { longURL: 'https://github.com', userID: 'user1' }
+      'abc123': { longURL: 'https://example.com', userId: 'user1' },
+      'ghi789': { longURL: 'https://github.com', userId: 'user1' }
     });
   });
 

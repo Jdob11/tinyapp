@@ -34,7 +34,7 @@ const authenticateUser = (loginInfo, users) => {
   }
   
   const passwordCheck = bcrypt.compareSync(password, user.password);
-  
+
   if (!passwordCheck) {
     return { error: '<h3>Incorrect Password.</h3>\nPlease <a href="/login">try again.</a>', user: null };
   }
@@ -67,11 +67,11 @@ const createNewUser = (userInfo, users) => {
 };
 
 // add URL to the database
-const addURLToDatabase = (longURL, userID, urlDatabase) => {
+const addURLToDatabase = (longURL, userId, urlDatabase) => {
   const id = generateRandomString();
   urlDatabase[id] = {
     longURL: longURL,
-    userID: userID
+    userId: userId
   };
 
   return { error: null, url: { id: id } };
@@ -81,7 +81,7 @@ const addURLToDatabase = (longURL, userID, urlDatabase) => {
 const urlsForUser = (currentUser, urlDatabase) => {
   const userURLs = {};
   for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === currentUser)
+    if (urlDatabase[shortURL].userId === currentUser)
       userURLs[shortURL] = urlDatabase[shortURL];
   }
 
