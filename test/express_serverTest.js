@@ -33,7 +33,6 @@ describe('express_server.js tests\n', () => {
     it('GET request to /urls/:id (existing id) should receive an error message when not logged in', (done) => {
       chai.request(app)
         .get('/urls/b6UTxQ')
-        .redirects(0)
         .end((err, res) => {
           expect(res).to.have.status(403);
           expect(res.text).to.include('You must be logged in to view and edit URLs');
@@ -44,7 +43,6 @@ describe('express_server.js tests\n', () => {
     it('GET request to /urls/NOTEXISTS should receive an error message when the id does not exist', (done) => {
       chai.request(app)
         .get('/urls/NOTEXISTS')
-        .redirects(0)
         .end((err, res) => {
           expect(res).to.have.status(404);
           expect(res.text).to.include('The requested URL does not exist.');
@@ -63,16 +61,14 @@ describe('express_server.js tests\n', () => {
         .post('/register')
         .send({ email: 'test@example.com', password: 'test123' })
         .then(res => {
-          expect(res).to.redirect; // Assuming successful registration redirects to login page
-  
+          expect(res).to.redirect;
           // Login with the newly registered user credentials
           return agent
             .post('/login')
             .send({ email: 'test@example.com', password: 'test123' });
         })
         .then(res => {
-          expect(res).to.redirect; // Assuming successful login redirects to /urls page
-  
+          expect(res).to.redirect;
           // Access the restricted URL after successful login
           return agent.get('/urls/b6UTxQ');
         })
@@ -82,7 +78,7 @@ describe('express_server.js tests\n', () => {
           expect(res.text).to.include('Users can only view URLs belonging to themselves.');
         })
         .catch(err => {
-          throw err; // Throw any errors encountered during the test
+          throw err;
         });
     });
   });
@@ -95,7 +91,6 @@ describe('express_server.js tests\n', () => {
         console.log('\nServer closed successfully');
       }
       done(err);
-      process.exit();
     });
   });
 });
