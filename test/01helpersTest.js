@@ -35,7 +35,7 @@ describe('helper.js tests\n', () => {
     it('should return a user with valid email', () => {
       const user = getUserByEmail('user@example.com', testUsers);
       assert.exists(user.email);
-      assert.strictEqual('user@example.com', user.email)
+      assert.strictEqual('user@example.com', user.email);
     });
 
     it('should return a undefined with invalid email', () => {
