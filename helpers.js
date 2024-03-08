@@ -16,24 +16,25 @@ const generateRandomString = () => {
 
 // search users database for user matching given email
 const getUserByEmail = (email, users) => {
-  return Object.values(users).find(user => user.email === email) || null;
+  return Object.values(users).find(user => user.email === email);
 };
 
 // search if id in url exists in urlDatabase
 const findIdInDatabase = (id, urlDatabase) => {
-  return Object.keys(urlDatabase).find(url => url === id) || null;
+  return Object.keys(urlDatabase).find(url => url === id);
 };
 
 // authenticate user based on login information
 const authenticateUser = (loginInfo, users) => {
   const { email, password } = loginInfo;
   const user = getUserByEmail(email, users);
-  const passwordCheck = bcrypt.compareSync(password, user.password);
-
+  
   if (!user) {
     return { error: '<h3>No account associated with that e-mail exists.</h3>\nPlease <a href="/register">register.', user: null };
   }
-
+  
+  const passwordCheck = bcrypt.compareSync(password, user.password);
+  
   if (!passwordCheck) {
     return { error: '<h3>Incorrect Password.</h3>\nPlease <a href="/login">try again.</a>', user: null };
   }
@@ -92,9 +93,11 @@ const urlsForUser = (currentUser, urlDatabase) => {
 };
 
 module.exports = {
+  generateRandomString,
   createNewUser,
   authenticateUser,
   addURLToDatabase,
   urlsForUser,
-  findIdInDatabase
+  findIdInDatabase,
+  getUserByEmail
 };
