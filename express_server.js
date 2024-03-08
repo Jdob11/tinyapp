@@ -11,16 +11,32 @@ const { createNewUser,
 const PORT = 8080;
 
 // database of short URLs and their corresponding long URLs
-const urlDatabase = {};
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
+};
 
 // object to contain user information
-const users = {};
+const users = {
+  "aJ48lW": {
+    id: "aJ48lW",
+    email: "user2@example.com",
+    password: "$2a$10$RpJU9UsYhjwkmRDeQFrqTO4dpc2CZYsxS8y5MvWl5TH8JsfdD8BmK"
+  }
+};
 
 // initialize express
 const app = express();
 
 // middleware setup
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieSession({
   name: 'session',
   keys: ['banana', 'mongoose', 'typewriter'],
@@ -33,7 +49,10 @@ app.set('view engine', 'ejs');
 // GET routes
 // route for no route to redirect to urls main page
 app.get('/', (req, res) => {
-  return res.redirect('/urls');
+  if (req.session.userId) {
+    return res.redirect('/urls');
+  }
+  return res.redirect('/login');
 });
 
 // route to display registration page to add new account
@@ -101,7 +120,7 @@ app.get('/urls/:id', (req, res) => {
   const urlExists = findIdInDatabase(id, urlDatabase);
   
   if (!urlExists) {
-    return res.status(403).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+    return res.status(404).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
   }
   
   if (!userId) {
@@ -239,10 +258,11 @@ app.post('/register', (req, res) => {
 });
 
 // start the server and listen on the specified port
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Tinyapp server listening on port ${PORT}!`);
 });
 
 module.exports = {
-  users,
+  app,
+  server
 };
