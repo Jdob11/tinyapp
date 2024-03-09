@@ -49,7 +49,8 @@ app.set('view engine', 'ejs');
 // GET routes
 // route for no route to redirect to urls main page
 app.get('/', (req, res) => {
-  if (req.session.userId) {
+  const user = req.session.userId;
+  if (user) {
     return res.redirect('/urls');
   }
   return res.redirect('/login');
@@ -87,15 +88,17 @@ app.get('/urls', (req, res) => {
   const { error, userURLs } = urlsForUser(userId, urlDatabase);
   const templateVars = {
     urls: userURLs,
-    user:users[userId]
+    user: users[userId],
+    error: error
   };
 
   if (!userId) {
-    return res.status(403).send('<h3>You must be <a href="/login">logged in</a> to view URLs.</h3>');
+    templateVars.error = '<h5>You must be <a href="/login">logged in</a> to view URLs.</h5>'
+    return res.status(403).render('error', templateVars);
   }
 
   if (error) {
-    return res.status(403).send(error);
+    return res.status(403).render('error', templateVars);
   }
 
   return res.render('urls_index', templateVars);
@@ -118,20 +121,28 @@ app.get('/urls/:id', (req, res) => {
   const userId = req.session.userId;
   const id = req.params.id;
   const urlExists = findIdInDatabase(id, urlDatabase);
-  
+  let templateVars = { 
+    user: userId,
+    error: ""
+  };
+
   if (!urlExists) {
-    return res.status(404).send('<h3>The requested URL does not exist.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+    templateVars.error = '<h5>The requested URL does not exist.</h5> \nPlease add some <a href="/urls/new">URLs.</a>'
+    return res.status(404).render('error', templateVars);
   }
   
   if (!userId) {
-    return res.status(403).send('<h3>You must be logged in to view and edit URLs.</h3> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>');
+    templateVars.error = '<h5>You must be logged in to view and edit URLs.</h5> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>'
+    return res.status(403).render('error', templateVars);
   }
   
   if (userId !== urlDatabase[id].userId) {
-    return res.status(403).send('<h3>Users can only view URLs belonging to themselves.</h3> \nPlease add some <a href="/urls/new">URLs.</a>');
+    templateVars.error = '<h5>Users can only view URLs belonging to themselves.</h5> \nPlease add some <a href="/urls/new">URLs.</a>';
+    templateVars.user = users[userId];
+    return res.status(403).render('error', templateVars);
   }
   
-  const templateVars = {
+  templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
     user: users[req.session.userId],
@@ -142,11 +153,17 @@ app.get('/urls/:id', (req, res) => {
 
 // route to use short url id to redirect user to longURL site
 app.get('/u/:id', (req, res) => {
+  const userId = req.session.userId;
   const shortURL = req.params.id;
+  const templateVars = { 
+    user: users[userId],
+    error: ''
+  };
   let longURL = urlDatabase[shortURL] ? urlDatabase[shortURL].longURL : null;
 
   if (!longURL) {
-    return res.status(404).send('404 not found: requested URL does not exist');
+    templateVars.error = '<h5>404 not found: requested URL does not exist</h5>';
+    return res.status(404).render('error', templateVars);
   }
 
   if (!longURL.startsWith('http://') && !longURL.startsWith('https://')) {

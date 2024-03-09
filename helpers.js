@@ -30,13 +30,13 @@ const authenticateUser = (loginInfo, users) => {
   const user = getUserByEmail(email, users);
   
   if (!user) {
-    return { error: '<h3>No account associated with that e-mail exists.</h3>\nPlease <a href="/register">register.', user: null };
+    return { error: '<h5>No account associated with that e-mail exists.</h5>\nPlease <a href="/register">register.', user: null };
   }
   
   const passwordCheck = bcrypt.compareSync(password, user.password);
 
   if (!passwordCheck) {
-    return { error: '<h3>Incorrect Password.</h3>\nPlease <a href="/login">try again.</a>', user: null };
+    return { error: '<h5>Incorrect Password.</h5>\nPlease <a href="/login">try again.</a>', user: null };
   }
 
   return { error: null, user };
@@ -48,11 +48,11 @@ const createNewUser = (userInfo, users) => {
   const emailCheck = getUserByEmail(email, users);
 
   if (!email || !password) {
-    return { error: '<h3>You must enter both an email and a password to register.</h3> \nPlease <a href="/register">try again.</a>', user: null };
+    return { error: '<h5>You must enter both an email and a password to register.</h5> \nPlease <a href="/register">try again.</a>', user: null };
   }
 
   if (emailCheck) {
-    return { error: '<h3>This e-mail already exists</h3>\nPlease <a href="/register">try again</a> with a new email.', user: null };
+    return { error: '<h5>This e-mail already exists</h5>\nPlease <a href="/register">try again</a> with a new email.', user: null };
   }
 
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -86,7 +86,7 @@ const urlsForUser = (currentUser, urlDatabase) => {
   }
 
   if (Object.keys(userURLs).length === 0) {
-    const error = '<h3>No URLs found for the current user.</h3>\nPlease add some <a href="/urls/new">URLs.</a>';
+    const error = '<h5>No URLs found for the current user.</h5>\nPlease add some <a href="/urls/new">URLs.</a>';
     return { error, userURLs: null};
   }
   return { error: null, userURLs };
