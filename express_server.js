@@ -5,7 +5,8 @@ const { createNewUser,
   addURLToDatabase,
   authenticateUser,
   urlsForUser,
-  findIdInDatabase } = require('./helpers');
+  findIdInDatabase, 
+  getUserByEmail} = require('./helpers');
 
 // constants
 const PORT = 8080;
@@ -265,13 +266,20 @@ app.post('/logout', (req, res) => {
 
 // route to handle POST request with user registration info
 app.post('/register', (req, res) => {
+  const email = req.body.email;
   const { error } = createNewUser(req.body, users);
+  const user = getUserByEmail(email, users);
+  const templateVars = {
+    user,
+    error
+  };
 
   if (error) {
-    return res.status(400).send(error);
+    return res.status(400).render('error', templateVars);
   }
 
-  return res.redirect('/login');
+  req.session.userId = user.id;
+  return res.redirect('/urls');
 });
 
 // start the server and listen on the specified port
