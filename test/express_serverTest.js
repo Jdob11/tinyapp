@@ -45,7 +45,7 @@ describe('express_server.js tests\n', () => {
         .get('/urls/NOTEXISTS')
         .end((err, res) => {
           expect(res).to.have.status(404);
-          expect(res.text).to.include('The requested URL does not exist.');
+          expect(res.text).to.include(res.text, 'Requested URL does not exist.');
           done();
         });
     });

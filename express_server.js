@@ -84,7 +84,7 @@ app.get("/login", (req, res) => {
 });
 
 // route to render the 'urls_index' template with urlDatabase
-app.get('/urls', (req, res) => {
+app.get('/urls', (req, res, next) => {
   const userId = req.session.userId;
   const { error, userURLs } = urlsForUser(userId, urlDatabase);
   const templateVars = {
@@ -94,15 +94,15 @@ app.get('/urls', (req, res) => {
   };
 
   if (!userId) {
-    templateVars.error = '<h5>You must be <a href="/login">logged in</a> to view URLs.</h5>';
-    return res.status(403).render('error', templateVars);
+    templateVars.error =  '<h5>You must be <a href="/login">logged in</a> to view URLs.</h5>';
+    return next({ status: 403, templateVars });
   }
 
   if (error) {
-    return res.status(403).render('error', templateVars);
+    return next({ status: 403, message: error, templateVars });
   }
 
-  return res.render('urls_index', templateVars);
+  res.render('urls_index', templateVars);
 });
 
 // route to display page to add new url to our database
@@ -118,7 +118,7 @@ app.get('/urls/new', (req, res) => {
 });
 
 // route to render the 'urls_show' template with specific URL information
-app.get('/urls/:id', (req, res) => {
+app.get('/urls/:id', (req, res, next) => {
   const userId = req.session.userId;
   const id = req.params.id;
   const urlExists = findIdInDatabase(id, urlDatabase);
@@ -128,32 +128,32 @@ app.get('/urls/:id', (req, res) => {
   };
 
   if (!urlExists) {
-    templateVars.error = '<h5>The requested URL does not exist.</h5> \nPlease add some <a href="/urls/new">URLs.</a>';
-    return res.status(404).render('error', templateVars);
+    templateVars.error = '<h5>404 not found: Requested URL does not exist</h5>';
+    return next({ status: 404, templateVars });
   }
-  
+
   if (!userId) {
     templateVars.error = '<h5>You must be logged in to view and edit URLs.</h5> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>';
-    return res.status(403).render('error', templateVars);
+    return next({ status: 403, templateVars });
   }
-  
+
   if (userId !== urlDatabase[id].userId) {
     templateVars.error = '<h5>Users can only view URLs belonging to themselves.</h5> \nPlease add some <a href="/urls/new">URLs.</a>';
     templateVars.user = users[userId];
-    return res.status(403).render('error', templateVars);
+    return next({ status: 403, templateVars });
   }
-  
+
   templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
     user: users[req.session.userId],
   };
-  
-  return res.render('urls_show', templateVars);
+
+  res.render('urls_show', templateVars);
 });
 
 // route to use short url id to redirect user to longURL site
-app.get('/u/:id', (req, res) => {
+app.get('/u/:id', (req, res, next) => {
   const userId = req.session.userId;
   const shortURL = req.params.id;
   const templateVars = {
@@ -164,7 +164,7 @@ app.get('/u/:id', (req, res) => {
 
   if (!longURL) {
     templateVars.error = '<h5>404 not found: requested URL does not exist</h5>';
-    return res.status(404).render('error', templateVars);
+    return next({ status: 404, templateVars });
   }
 
   if (!longURL.startsWith('http://') && !longURL.startsWith('https://')) {
@@ -181,7 +181,7 @@ app.get('/urls.json', (req, res) => {
 
 // POST routes
 // route to handle POST request to delete a URL with the specified ID from the urlDatabase object
-app.post('/urls/:id/delete', (req, res) => {
+app.post('/urls/:id/delete', (req, res, next) => {
   const id = req.params.id;
   const userId = req.session.userId;
   if (!userId) {
@@ -246,20 +246,16 @@ app.post('/urls', (req, res) => {
 });
 
 // route to handle POST request to create cookie with userId when user logs in to website
-app.post('/login', (req, res) => {
+app.post('/login', (req, res, next) => {
   const loginInfo = { email: req.body.email, password: req.body.password };
   const { error, user } = authenticateUser(loginInfo, users);
-  const templateVars = {
-    user,
-    error
-  };
 
   if (error) {
-    return res.status(403).render('error', templateVars);
+    return next({ status: 403, message: error, templateVars: { user } }); // Pass authentication error and templateVars to the error handling middleware
   }
 
   req.session.userId = user.id;
-  return res.redirect('/urls');
+  res.redirect('/urls');
 });
 
 // route to handle POST request to clear userId cookie when logout button is pressed
@@ -284,6 +280,14 @@ app.post('/register', (req, res) => {
 
   req.session.userId = user.id;
   return res.redirect('/urls');
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  const errorMessage = err.message || 'Internal Server Error';
+  const templateVars = err.templateVars || {}; // Use provided templateVars or an empty object if not provided
+  templateVars.user = templateVars.user || null;
+  res.status(err.status || 500).render('error', { error: errorMessage, ...templateVars }); // Pass error message and templateVars to the error template
 });
 
 // start the server and listen on the specified port
