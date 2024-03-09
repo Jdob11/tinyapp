@@ -249,9 +249,13 @@ app.post('/urls', (req, res) => {
 app.post('/login', (req, res) => {
   const loginInfo = { email: req.body.email, password: req.body.password };
   const { error, user } = authenticateUser(loginInfo, users);
+  const templateVars = {
+    user,
+    error
+  };
 
   if (error) {
-    return res.status(403).send(error);
+    return res.status(403).render('error', templateVars);
   }
 
   req.session.userId = user.id;
