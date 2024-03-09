@@ -6,6 +6,14 @@ TinyApp is a simple URL shortening web application that allows users to shorten 
 
 TinyApp uses EJS (Embedded JavaScript) templates for rendering dynamic content and forms across various pages. Below are the EJS files and their functionalities within the project.
 
+## Project Information
+
+This project was developed as part of the curriculum at Lighthouse Labs. It represents an educational exercise and may contain specific requirements or constraints imposed by the course instructors.
+
+### Note to Contributors
+
+If you're considering contributing to this project or using it as a reference, please be aware that it was created for educational purposes and may not adhere to all industry standards or best practices. While contributions and feedback are welcome, please keep in mind the context in which this project was developed.
+
 ## File Structure
 
 ### Root Folder (`/`)
@@ -101,6 +109,10 @@ npm test
 ## Contributors
 
 - Jeff Dobson (https://github.com/Jdob11)
+
+## Acknowledgments
+
+This project includes code provided by [Lighthouse Labs](https://www.lighthouselabs.ca/).
 
 ## License
 
