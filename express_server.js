@@ -5,7 +5,7 @@ const { createNewUser,
   addURLToDatabase,
   authenticateUser,
   urlsForUser,
-  findIdInDatabase, 
+  findIdInDatabase,
   getUserByEmail} = require('./helpers');
 
 // constants
@@ -94,7 +94,7 @@ app.get('/urls', (req, res) => {
   };
 
   if (!userId) {
-    templateVars.error = '<h5>You must be <a href="/login">logged in</a> to view URLs.</h5>'
+    templateVars.error = '<h5>You must be <a href="/login">logged in</a> to view URLs.</h5>';
     return res.status(403).render('error', templateVars);
   }
 
@@ -122,18 +122,18 @@ app.get('/urls/:id', (req, res) => {
   const userId = req.session.userId;
   const id = req.params.id;
   const urlExists = findIdInDatabase(id, urlDatabase);
-  let templateVars = { 
+  let templateVars = {
     user: userId,
     error: ""
   };
 
   if (!urlExists) {
-    templateVars.error = '<h5>The requested URL does not exist.</h5> \nPlease add some <a href="/urls/new">URLs.</a>'
+    templateVars.error = '<h5>The requested URL does not exist.</h5> \nPlease add some <a href="/urls/new">URLs.</a>';
     return res.status(404).render('error', templateVars);
   }
   
   if (!userId) {
-    templateVars.error = '<h5>You must be logged in to view and edit URLs.</h5> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>'
+    templateVars.error = '<h5>You must be logged in to view and edit URLs.</h5> \nPlease <a href="/login">login</a> or <a href="/register">register.</a>';
     return res.status(403).render('error', templateVars);
   }
   
@@ -156,7 +156,7 @@ app.get('/urls/:id', (req, res) => {
 app.get('/u/:id', (req, res) => {
   const userId = req.session.userId;
   const shortURL = req.params.id;
-  const templateVars = { 
+  const templateVars = {
     user: users[userId],
     error: ''
   };
