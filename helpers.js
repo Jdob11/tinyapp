@@ -69,6 +69,9 @@ const createNewUser = (userInfo, users) => {
 // add URL to the database
 const addURLToDatabase = (longURL, userId, urlDatabase) => {
   const id = generateRandomString();
+  if (!longURL) {
+    return { error: '<h5>You must input a URL.</h5>\nPlease <a href="/urls/new">try again.</a>', url: null };
+  }
   urlDatabase[id] = {
     longURL: longURL,
     userId: userId

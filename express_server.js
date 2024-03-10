@@ -184,16 +184,17 @@ app.get('/urls.json', (req, res) => {
 app.post('/urls/:id/delete', (req, res, next) => {
   const id = req.params.id;
   const userId = req.session.userId;
+  console.log(req.session);
   if (!userId) {
-    return res.status(403).send('You must be logged in to view and edit URLs.');
+    return next({ status: 403, message: 'You must be logged in to view and edit URLs.'});
   }
   
   if (userId !== urlDatabase[id].userId) {
-    return res.status(403).send('Users can only view or edit URLs belonging to themselves.');
+    return next({ status: 403, message: 'Users can only view or edit URLs belonging to themselves.'});
   }
 
   if (!findIdInDatabase(id, urlDatabase)) {
-    return res.status(403).send('The requested URL does not exist.');
+    return next({ status: 403, message: 'The requested URL does not exist.'});
   }
 
   delete urlDatabase[id];
@@ -228,18 +229,18 @@ app.post('/urls/:id/edit', (req, res) => {
 });
 
 // route to handle POST request to generate short url id, pair with user given long url, and add both to urlDatabase
-app.post('/urls', (req, res) => {
+app.post('/urls', (req, res, next) => {
   const userId = req.session.userId;
   const longURL = req.body.longURL;
 
   if (!userId) {
-    return res.status(403).send('You must be logged in to create URLs.');
+    return next({ status: 403, message: 'You must be logged in to create URLs.'});
   }
 
   const { error, url } = addURLToDatabase(longURL, userId, urlDatabase);
 
   if (error) {
-    return res.status(400).send(error);
+    return next({ status: 400, message: error });
   }
 
   return res.redirect(`/urls/${url.id}`);
@@ -265,7 +266,7 @@ app.post('/logout', (req, res) => {
 });
 
 // route to handle POST request with user registration info
-app.post('/register', (req, res) => {
+app.post('/register', (req, res, next) => {
   const email = req.body.email;
   const { error } = createNewUser(req.body, users);
   const user = getUserByEmail(email, users);
@@ -275,7 +276,7 @@ app.post('/register', (req, res) => {
   };
 
   if (error) {
-    return res.status(400).render('error', templateVars);
+    return next({ status: 400, message: error, templateVars});
   }
 
   req.session.userId = user.id;
