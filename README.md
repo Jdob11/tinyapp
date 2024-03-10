@@ -6,6 +6,12 @@ TinyApp is a simple URL shortening web application that allows users to shorten 
 
 TinyApp uses EJS (Embedded JavaScript) templates for rendering dynamic content and forms across various pages. Below are the EJS files and their functionalities within the project.
 
+## Final Product
+
+!["Screenshot of URLs page"](https://github.com/Jdob11/tinyapp/blob/main/docs/urls_index.png?raw=true)
+!["Screenshot of URL edit page"](https://github.com/Jdob11/tinyapp/blob/main/docs/urls_show.png?raw=true)
+!["Screenshot of error when registering"](https://github.com/Jdob11/tinyapp/blob/main/docs/register_error.png?raw=true)
+
 ## Project Information
 
 This project was developed as part of the curriculum at Lighthouse Labs. It represents an educational exercise and may contain specific requirements or constraints imposed by the course instructors.
